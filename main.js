@@ -4,37 +4,32 @@ import funcc from "./index";
 (async () => {
   const device = document.querySelector("#devices-id");
   const videoTag = document.querySelector("video");
+  const ref = document.querySelector("#ref");
 
   const devices = await navigator.mediaDevices.enumerateDevices();
   const audioDevices = devices.filter((device) => device.kind === "audioinput");
   audioDevices.forEach(({ label, deviceId }) => {
     // console.log(deviceId);
-    device.innerHTML += `
-  <option value=${deviceId}>${label}</option>
-`;
+    device.innerHTML += `<option value=${deviceId}>${label}</option>`;
   });
 
-  const useState = (state) => {
-    const setState = (newState) => newState;
-    return [state, setState];
-  };
+  // device.addEventListener("change", (e) => {
+  //   ref.innerText = e.target.value;
+  // });
 
-  const [state, setState] = useState("");
-
-  device.onchange = () => {
-    setState(device.options[device.selectedIndex].value);
+  device.onchange = async (e) => {
+    // console.log(device.options[device.selectedIndex].value);
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: {
+        deviceId: e.target.value,
+        echoCancellation: true,
+      },
+    });
+    videoTag.srcObject = stream;
   };
-  //"d78521b1a03bdc0f9a2564e0ffd018366baeda891f3305f8dd62d3462a294c40"
 
   // console.log(device.value);
 
-  const instancee = await navigator.mediaDevices.getUserMedia({
-    audio: {
-      deviceId:
-        "d78521b1a03bdc0f9a2564e0ffd018366baeda891f3305f8dd62d3462a294c40",
-    },
-    video: { noiseSuppression: !true },
-  });
-  videoTag.srcObject = instancee;
-  videoTag.onloadedmetadata = () => videoTag.play();
+  // "d78521b1a03bdc0f9a2564e0ffd018366baeda891f3305f8dd62d3462a294c40"
 })();
