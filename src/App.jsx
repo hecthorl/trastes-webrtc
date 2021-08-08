@@ -1,37 +1,37 @@
 import "./App.css";
 import { useState, useEffect, useRef } from "react";
+import useAudioDevice from "./useAudioDevice";
 
 function App() {
-  const [dispositivos, setDispositivos] = useState([]);
-  const [currentAudioDevice, setCurrentAudioDevice] = useState("");
-  // const [videoSrc, setVideoSrc] = useState(null);
+  const { currentAudioDevice, dispositivos, handleAudioChange } =
+    useAudioDevice();
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((item) => {
-      const audioDevices = item.filter(({ deviceId, kind }) => {
-        return deviceId.length === 64 && kind === "audioinput";
-      });
-      setDispositivos(audioDevices);
-    });
-  }, []);
+  console.log({ dispositivos });
+
+  const defaultDevice = dispositivos[0]?.deviceId;
+
+  const [contrains, setContrains] = useState({
+    video: true,
+    audio: { deviceId: defaultDevice },
+  });
+  // console.log({ defaultDevice });
 
   useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: { deviceId: currentAudioDevice },
-        video: true,
-      })
-      .then((mediaStream) => {
-        // setVideoSrc(stream);
-        console.log(mediaStream);
-        videoRef.current.srcObject = mediaStream;
-      });
+    setContrains({
+      audio: { deviceId: currentAudioDevice },
+      ...contrains,
+    });
   }, [currentAudioDevice]);
 
-  const handleAudioChange = (e) => {
-    setCurrentAudioDevice(e.target.value);
-  };
+  // useEffect(() => {
+  //   console.log(contrains);
+
+  // }, []);
+  navigator.mediaDevices.getUserMedia(contrains).then((mediaStream) => {
+    console.log(mediaStream);
+    videoRef.current.srcObject = mediaStream;
+  });
 
   return (
     <div className="App">
